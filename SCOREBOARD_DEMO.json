@@ -1,0 +1,137 @@
+{
+  "demo": "AI Model Quality Scoreboard - Example Race",
+  "description": "This demonstrates a complete race between Claude Sonnet 4.5 and GPT-5 extracting facts from a legal document",
+
+  "step_1_create_task": {
+    "tool": "scoreboard_create_task",
+    "params": {
+      "title": "Extract Facts: BLB Domestic Violence Risk Assessment",
+      "description": "Extract 5 key facts from BLB_Domestic_Violence_Risk_Factors.pdf using evidence card JSON schema. Include UIDs, exhibit numbers, and direct quotes.",
+      "difficulty": "medium",
+      "max_points": 500
+    },
+    "response": {
+      "task_id": "task_001",
+      "status": "open"
+    }
+  },
+
+  "step_2a_claude_submits": {
+    "tool": "scoreboard_submit_work",
+    "params": {
+      "model_name": "claude-sonnet-4.5",
+      "task_id": "task_001",
+      "content": "{\n  \"evidence_cards\": [\n    {\n      \"uid\": \"933\",\n      \"fact\": \"Domestic violence incidents increase risk of future violence by 76%\",\n      \"source\": \"BLB_Domestic_Violence_Risk_Factors.pdf\",\n      \"exhibit_number\": \"Exhibit 12\",\n      \"page\": 3,\n      \"direct_quote\": \"Studies show that prior incidents of domestic violence increase the likelihood of future violent behavior by approximately 76 percent.\",\n      \"legal_relevance\": \"Establishes pattern of escalating violence\",\n      \"confidence\": 0.98\n    },\n    {\n      \"uid\": \"934\",\n      \"fact\": \"Presence of firearms increases lethality risk 5x\",\n      \"source\": \"BLB_Domestic_Violence_Risk_Factors.pdf\",\n      \"exhibit_number\": \"Exhibit 12\",\n      \"page\": 5,\n      \"direct_quote\": \"The presence of a firearm in domestic violence situations increases the risk of homicide by a factor of five.\",\n      \"legal_relevance\": \"Critical risk factor for protective order\",\n      \"confidence\": 0.99\n    },\n    {\n      \"uid\": \"935\",\n      \"fact\": \"Threats of suicide correlate with intimate partner homicide\",\n      \"source\": \"BLB_Domestic_Violence_Risk_Factors.pdf\",\n      \"exhibit_number\": \"Exhibit 12\",\n      \"page\": 7,\n      \"direct_quote\": \"Threats of suicide by the abuser are strongly correlated with intimate partner homicide-suicide events.\",\n      \"legal_relevance\": \"Indicator of extreme risk requiring immediate intervention\",\n      \"confidence\": 0.97\n    },\n    {\n      \"uid\": \"936\",\n      \"fact\": \"Strangulation indicates 750% increased homicide risk\",\n      \"source\": \"BLB_Domestic_Violence_Risk_Factors.pdf\",\n      \"exhibit_number\": \"Exhibit 12\",\n      \"page\": 9,\n      \"direct_quote\": \"Non-fatal strangulation is associated with a 750 percent increase in the risk of becoming a homicide victim.\",\n      \"legal_relevance\": \"Most significant predictor of lethal violence\",\n      \"confidence\": 0.99\n    },\n    {\n      \"uid\": \"937\",\n      \"fact\": \"Violation of protective orders doubles re-assault risk\",\n      \"source\": \"BLB_Domestic_Violence_Risk_Factors.pdf\",\n      \"exhibit_number\": \"Exhibit 12\",\n      \"page\": 11,\n      \"direct_quote\": \"Violation of a protective order doubles the risk of subsequent assault within the following year.\",\n      \"legal_relevance\": \"Demonstrates disregard for court authority and victim safety\",\n      \"confidence\": 0.96\n    }\n  ],\n  \"metadata\": {\n    \"total_facts\": 5,\n    \"avg_confidence\": 0.978,\n    \"exhibits_referenced\": [\"Exhibit 12\"],\n    \"template_used\": \"evidence_card_schema_v1.0\"\n  }\n}",
+      "format": "json",
+      "metadata": {
+        "completion_time_seconds": 42,
+        "tokens_used": 2156
+      }
+    },
+    "response": {
+      "submission_id": "sub_claude_001",
+      "status": "pending_review"
+    }
+  },
+
+  "step_2b_gpt5_submits": {
+    "tool": "scoreboard_submit_work",
+    "params": {
+      "model_name": "gpt-5",
+      "task_id": "task_001",
+      "content": "{\n  \"evidence_cards\": [\n    {\n      \"uid\": \"933\",\n      \"fact\": \"Prior domestic violence increases future risk\",\n      \"source\": \"BLB_Domestic_Violence_Risk_Factors.pdf\",\n      \"page\": 3,\n      \"direct_quote\": \"Prior incidents increase likelihood of future violent behavior.\",\n      \"legal_relevance\": \"Shows pattern\"\n    },\n    {\n      \"uid\": \"934\",\n      \"fact\": \"Firearms present in DV situations\",\n      \"source\": \"BLB_Domestic_Violence_Risk_Factors.pdf\",\n      \"page\": 5,\n      \"legal_relevance\": \"Risk factor\"\n    },\n    {\n      \"uid\": \"935\",\n      \"fact\": \"Suicide threats are dangerous\",\n      \"source\": \"BLB_Domestic_Violence_Risk_Factors.pdf\",\n      \"exhibit_number\": \"Exhibit 12\",\n      \"page\": 7,\n      \"direct_quote\": \"Threats of suicide correlate with homicide-suicide events\"\n    },\n    {\n      \"uid\": \"936\",\n      \"fact\": \"Strangulation is very serious\",\n      \"source\": \"BLB_Domestic_Violence_Risk_Factors.pdf\",\n      \"exhibit_number\": \"Exhibit 12\",\n      \"page\": 9,\n      \"direct_quote\": \"Strangulation increases homicide risk significantly\"\n    },\n    {\n      \"uid\": \"937\",\n      \"fact\": \"Protective order violations increase risk\",\n      \"source\": \"BLB_Domestic_Violence_Risk_Factors.pdf\",\n      \"page\": 11\n    }\n  ]\n}",
+      "format": "json",
+      "metadata": {
+        "completion_time_seconds": 38,
+        "tokens_used": 1892
+      }
+    },
+    "response": {
+      "submission_id": "sub_gpt5_001",
+      "status": "pending_review"
+    }
+  },
+
+  "step_3a_judge_claude": {
+    "tool": "scoreboard_judge_submission",
+    "params": {
+      "submission_id": "sub_claude_001",
+      "judge_id": "human",
+      "accuracy": 99,
+      "completeness": 100,
+      "citation_quality": 100,
+      "legal_reasoning": 95,
+      "format_compliance": 100,
+      "bonus_points": 20,
+      "comments": "EXCEPTIONAL. Perfect schema compliance. All 5 facts include: UID, direct quote, exhibit number, page, legal relevance, confidence score. Quotes are precise with specific statistics (76%, 5x, 750%, 2x). Legal relevance is thoughtful and specific. This is the Tyler method in action: over-detailed > vague. 1+1=2 logical chains. Exhibit 12 properly cited throughout. Full bonus awarded."
+    },
+    "response": {
+      "submission_id": "sub_claude_001",
+      "model_name": "claude-sonnet-4.5",
+      "judge_score": {
+        "accuracy": 99,
+        "completeness": 100,
+        "citation_quality": 100,
+        "legal_reasoning": 95,
+        "format_compliance": 100,
+        "bonus_points": 20,
+        "total_score": 514
+      },
+      "final_score": 514
+    }
+  },
+
+  "step_3b_judge_gpt5": {
+    "tool": "scoreboard_judge_submission",
+    "params": {
+      "submission_id": "sub_gpt5_001",
+      "judge_id": "human",
+      "accuracy": 85,
+      "completeness": 80,
+      "citation_quality": 60,
+      "legal_reasoning": 70,
+      "format_compliance": 75,
+      "bonus_points": 3,
+      "comments": "Good effort but critical gaps. CITATION ISSUES: Missing exhibit numbers on 3 of 5 facts. Direct quotes are paraphrased/shortened - not verbatim. Missing confidence scores entirely. Missing metadata object. ACCURACY ISSUES: Fact 933 missing the 76% statistic. Fact 934 missing direct quote entirely. Fact 936 says 'significantly' instead of '750%' - this is 1+1=cereal bowl logic. LEGAL REASONING: Vague ('shows pattern', 'risk factor') instead of specific legal relevance. This demonstrates why over-detailed templates matter. Small bonus for getting UIDs correct."
+    },
+    "response": {
+      "submission_id": "sub_gpt5_001",
+      "model_name": "gpt-5",
+      "judge_score": {
+        "accuracy": 85,
+        "completeness": 80,
+        "citation_quality": 60,
+        "legal_reasoning": 70,
+        "format_compliance": 75,
+        "bonus_points": 3,
+        "total_score": 373
+      },
+      "final_score": 373
+    }
+  },
+
+  "step_4_view_scoreboard": {
+    "tool": "scoreboard_view",
+    "params": {
+      "sort_by": "total_points",
+      "limit": 5
+    },
+    "response": {
+      "scoreboard": "\n🏆 QUALITY SCOREBOARD (sorted by total_points) 🏆\n\nRank   Model                     Points     Accuracy   Complete   Citations  Legal      Bonus     \n==============================================================================================================\n1      claude-sonnet-4.5         514        99.0       100.0      100.0      95.0       20        \n2      gpt-5                     373        85.0       80.0       60.0       70.0       3         \n\n==============================================================================================================\n\nTotal Models: 2\nTotal Submissions: 2\n"
+    }
+  },
+
+  "outcome": {
+    "winner": "claude-sonnet-4.5",
+    "winning_margin": 141,
+    "key_differences": [
+      "Claude included exact statistics (76%, 5x, 750%, 2x) vs GPT-5's vague 'significantly'",
+      "Claude provided verbatim quotes vs GPT-5's paraphrasing",
+      "Claude included exhibit numbers on ALL facts vs GPT-5 missing 3 of 5",
+      "Claude included confidence scores and metadata vs GPT-5 missing both",
+      "Claude's legal relevance was specific vs GPT-5's generic phrases"
+    ],
+    "lesson": "Tyler's method wins: Over-detailed templates > vague templates. PRINCIPLE defined > vague references. Exhibit numbers > no exhibit numbers. 1+1=2 > 1+1=cereal bowl.",
+    "next_race": "Winner (Claude) defines the next task: 'Build a legal paragraph using Tyler's template for UIDs 933-937'"
+  }
+}

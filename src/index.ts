@@ -9,6 +9,7 @@ import type { Resource } from "@/resources/resource";
 import { createServerWithTools } from "@/server";
 import * as common from "@/tools/common";
 import * as custom from "@/tools/custom";
+import * as scoreboard from "@/tools/scoreboard";
 import * as snapshot from "@/tools/snapshot";
 import type { Tool } from "@/tools/tool";
 
@@ -26,6 +27,16 @@ const commonTools: Tool[] = [common.pressKey, common.wait];
 
 const customTools: Tool[] = [custom.getConsoleLogs, custom.screenshot];
 
+const scoreboardTools: Tool[] = [
+  scoreboard.createTask,
+  scoreboard.submitWork,
+  scoreboard.judgeSubmission,
+  scoreboard.viewScoreboard,
+  scoreboard.viewSubmission,
+  scoreboard.listTasks,
+  scoreboard.resetScoreboard,
+];
+
 const snapshotTools: Tool[] = [
   common.navigate(true),
   common.goBack(true),
@@ -37,6 +48,7 @@ const snapshotTools: Tool[] = [
   snapshot.selectOption,
   ...commonTools,
   ...customTools,
+  ...scoreboardTools,
 ];
 
 const resources: Resource[] = [];
