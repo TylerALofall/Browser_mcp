@@ -13,6 +13,8 @@ import * as scoreboard from "@/tools/scoreboard";
 import * as quoteStorage from "@/tools/quote-storage";
 import * as quoteSearch from "@/tools/quote-search";
 import * as quoteValidate from "@/tools/quote-validate";
+import * as jsonlLoader from "@/tools/jsonl-loader";
+import * as timeline from "@/tools/timeline";
 import * as snapshot from "@/tools/snapshot";
 import type { Tool } from "@/tools/tool";
 
@@ -55,6 +57,31 @@ const quoteTools: Tool[] = [
   quoteValidate.findDifferences,
 ];
 
+const jsonlTools: Tool[] = [
+  // JSONL import/export with enhanced metadata
+  jsonlLoader.importJSONL,
+  jsonlLoader.exportJSONL,
+  jsonlLoader.previewJSONL,
+  // Source attribution (quote-within-quote tracking)
+  jsonlLoader.searchBySource,
+  jsonlLoader.searchByDateRange,
+  jsonlLoader.findCrossReferences,
+  jsonlLoader.getEnhancedStatsTools,
+];
+
+const timelineTools: Tool[] = [
+  // Timeline management
+  timeline.createTimeline,
+  timeline.addEvent,
+  timeline.importTimelineJSONL,
+  // Timeline analysis
+  timeline.buildNarrative,
+  timeline.findECFCrossReferences,
+  timeline.overlayTimelines,
+  timeline.getStatsTools,
+  timeline.exportTimelineJSONL,
+];
+
 const snapshotTools: Tool[] = [
   common.navigate(true),
   common.goBack(true),
@@ -68,6 +95,8 @@ const snapshotTools: Tool[] = [
   ...customTools,
   ...scoreboardTools,
   ...quoteTools,
+  ...jsonlTools,
+  ...timelineTools,
 ];
 
 const resources: Resource[] = [];
