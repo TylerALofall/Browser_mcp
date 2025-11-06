@@ -16,6 +16,7 @@ import * as quoteValidate from "@/tools/quote-validate";
 import * as jsonlLoader from "@/tools/jsonl-loader";
 import * as timeline from "@/tools/timeline";
 import * as snapshot from "@/tools/snapshot";
+import * as aiMatchValidator from "@/tools/ai-match-validator";
 import type { Tool } from "@/tools/tool";
 
 import packageJSON from "../package.json";
@@ -86,6 +87,15 @@ const timelineTools: Tool[] = [
   timeline.exportTimelineJSONL,
 ];
 
+const aiMatchTools: Tool[] = [
+  // AI-powered match validation (multi-model comparison)
+  aiMatchValidator.prepareQuoteForAI,
+  aiMatchValidator.submitModelMatches,
+  aiMatchValidator.validateAndCompare,
+  aiMatchValidator.batchValidateAll,
+  aiMatchValidator.getValidationResult,
+];
+
 const snapshotTools: Tool[] = [
   common.navigate(true),
   common.goBack(true),
@@ -101,6 +111,7 @@ const snapshotTools: Tool[] = [
   ...quoteTools,
   ...jsonlTools,
   ...timelineTools,
+  ...aiMatchTools,
 ];
 
 const resources: Resource[] = [];
