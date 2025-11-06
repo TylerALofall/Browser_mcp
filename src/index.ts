@@ -17,6 +17,7 @@ import * as jsonlLoader from "@/tools/jsonl-loader";
 import * as timeline from "@/tools/timeline";
 import * as snapshot from "@/tools/snapshot";
 import * as aiMatchValidator from "@/tools/ai-match-validator";
+import * as ecf60Validator from "@/tools/ecf60-negative-validator";
 import type { Tool } from "@/tools/tool";
 
 import packageJSON from "../package.json";
@@ -96,6 +97,14 @@ const aiMatchTools: Tool[] = [
   aiMatchValidator.getValidationResult,
 ];
 
+const ecf60Tools: Tool[] = [
+  // ECF 60 negative claim validation (fraud upon the court)
+  ecf60Validator.getECF60NegativeClaims,
+  ecf60Validator.prepareECF60Claim,
+  ecf60Validator.submitECF60Validation,
+  ecf60Validator.generateECF60FraudReport,
+];
+
 const snapshotTools: Tool[] = [
   common.navigate(true),
   common.goBack(true),
@@ -112,6 +121,7 @@ const snapshotTools: Tool[] = [
   ...jsonlTools,
   ...timelineTools,
   ...aiMatchTools,
+  ...ecf60Tools,
 ];
 
 const resources: Resource[] = [];
