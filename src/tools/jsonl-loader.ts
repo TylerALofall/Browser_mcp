@@ -19,7 +19,7 @@ import type { Quote } from "./quote-storage";
 export interface EnhancedQuote extends Quote {
   // Source attribution - tracking quote-within-quote
   source_attribution?: {
-    quoted_by: string; // "tyler" | "beckerman" | "defendant" | "exhibit" | etc.
+    author: string; // "tyler" | "beckerman" | "defendant" | "exhibit" | etc.
     original_source?: string; // e.g., "Exhibit A", "ECF 17-1", etc.
     is_nested_quote: boolean; // Is this Tyler quoting someone else?
   };
@@ -32,6 +32,18 @@ export interface EnhancedQuote extends Quote {
   // Cross-references
   cross_references?: string[]; // ECF numbers this quote references
   related_quotes?: string[]; // Other quote_ids related to this
+
+  // Fuzzy match tracking for cross-document verification
+  matches_scanned?: string[]; // List of ECF documents scanned for matching quotes
+  matches_found?: Array<{
+    // Proper Bluebook citation format
+    ecf: string; // ECF number where match was found
+    page: string; // Page number
+    paragraph?: string; // Paragraph number if available (use instead of line if present)
+    line?: string; // Line number (skip if n/a or if paragraph is used)
+    quote_id: string; // ID of the matching quote
+    similarity_score: number; // Fuzzy match score (0-1)
+  }>;
 }
 
 /**
@@ -49,7 +61,7 @@ interface QuoteJSONL {
   position?: string;
 
   // Enhanced fields
-  quoted_by?: string; // Who is speaking?
+  author?: string; // Who is speaking?
   original_source?: string; // Where did they get this quote?
   date?: string; // When did this event occur?
   event_type?: string;
@@ -61,7 +73,7 @@ interface QuoteJSONL {
 // =============================================================================
 
 const enhancedQuotes: Map<string, EnhancedQuote> = new Map();
-const sourceIndex: Map<string, string[]> = new Map(); // quoted_by -> [quote_ids]
+const sourceIndex: Map<string, string[]> = new Map(); // author -> [quote_ids]
 const dateIndex: Map<string, string[]> = new Map(); // YYYY-MM-DD -> [quote_ids]
 const crossRefIndex: Map<string, string[]> = new Map(); // ecf_number -> [quote_ids that reference it]
 
@@ -111,20 +123,20 @@ function normalizeEventType(
  * Heuristics:
  * - Contains quotation marks within the text
  * - Cites an exhibit (ECF XX-1, Exhibit A, etc.)
- * - Has "quoted_by" field set to someone other than Tyler
+ * - Has "author" field set to someone other than Tyler
  */
 function detectSourceAttribution(data: QuoteJSONL): EnhancedQuote["source_attribution"] {
-  const quotedBy = data.quoted_by?.toLowerCase() || "tyler";
+  const author = data.author?.toLowerCase() || "tyler";
   const originalSource = data.original_source || data.cited || "";
 
   // Check if this is a nested quote (Tyler quoting someone else)
   const hasInnerQuotes = /["""''']/.test(data.quoted_point);
   const citesExhibit = /exhibit|ecf \d+-\d+/i.test(originalSource);
 
-  const isNestedQuote = quotedBy !== "tyler" || hasInnerQuotes || citesExhibit;
+  const isNestedQuote = author !== "tyler" || hasInnerQuotes || citesExhibit;
 
   return {
-    quoted_by: quotedBy,
+    author: author,
     original_source: originalSource || undefined,
     is_nested_quote: isNestedQuote,
   };
@@ -133,10 +145,10 @@ function detectSourceAttribution(data: QuoteJSONL): EnhancedQuote["source_attrib
 function addToEnhancedIndexes(quote: EnhancedQuote): void {
   // Index by source attribution
   if (quote.source_attribution) {
-    const quotedBy = quote.source_attribution.quoted_by;
-    const existing = sourceIndex.get(quotedBy) || [];
+    const author = quote.source_attribution.author;
+    const existing = sourceIndex.get(author) || [];
     existing.push(quote.quote_id);
-    sourceIndex.set(quotedBy, existing);
+    sourceIndex.set(author, existing);
   }
 
   // Index by date
@@ -188,6 +200,202 @@ function importQuoteFromJSONL(data: QuoteJSONL): EnhancedQuote {
 }
 
 // =============================================================================
+// FUZZY MATCHING FOR CROSS-REFERENCE VERIFICATION
+// =============================================================================
+
+/**
+ * Simple string similarity (0-1) using Levenshtein distance
+ * 1.0 = exact match, 0.0 = completely different
+ */
+function stringSimilarity(s1: string, s2: string): number {
+  if (s1 === s2) return 1.0;
+
+  const longer = s1.length > s2.length ? s1 : s2;
+  const shorter = s1.length > s2.length ? s2 : s1;
+
+  if (longer.length === 0) return 1.0;
+
+  const editDistance = levenshteinDistance(longer, shorter);
+  return (longer.length - editDistance) / longer.length;
+}
+
+/**
+ * Levenshtein distance between two strings
+ */
+function levenshteinDistance(s1: string, s2: string): number {
+  const costs: number[] = [];
+  for (let i = 0; i <= s1.length; i++) {
+    let lastValue = i;
+    for (let j = 0; j <= s2.length; j++) {
+      if (i === 0) {
+        costs[j] = j;
+      } else if (j > 0) {
+        let newValue = costs[j - 1];
+        if (s1.charAt(i - 1) !== s2.charAt(j - 1)) {
+          newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+        }
+        costs[j - 1] = lastValue;
+        lastValue = newValue;
+      }
+    }
+    if (i > 0) {
+      costs[s2.length] = lastValue;
+    }
+  }
+  return costs[s2.length];
+}
+
+/**
+ * Format Bluebook citation for a quote match
+ * Format: "ECF 60 pg 4" or "ECF 60 pg 4 ¶ 3" (if paragraph available)
+ * Skips line number if it's "n/a" or if paragraph is used
+ */
+function formatBluebookCitation(match: {
+  ecf: string;
+  page: string;
+  paragraph?: string;
+  line?: string;
+}): string {
+  let citation = `ECF ${match.ecf}`;
+
+  // Add page if available
+  if (match.page && match.page !== "n/a") {
+    citation += ` pg ${match.page}`;
+  }
+
+  // Add paragraph if available (preferred over line)
+  if (match.paragraph && match.paragraph !== "n/a") {
+    citation += ` ¶ ${match.paragraph}`;
+  } else if (match.line && match.line !== "n/a" && match.line !== "[n/a]") {
+    // Only add line if paragraph not available and line is valid
+    citation += ` ln ${match.line}`;
+  }
+
+  return citation;
+}
+
+/**
+ * Perform fuzzy matching of a quote against all other quotes in different ECF documents
+ * Returns matches with similarity score above threshold
+ */
+function findCrossDocumentMatches(
+  sourceQuote: EnhancedQuote,
+  threshold: number = 0.85,
+): EnhancedQuote["matches_found"] {
+  const allQuotes = getAllEnhancedQuotes();
+  const matches: NonNullable<EnhancedQuote["matches_found"]> = [];
+
+  const sourceText = sourceQuote.full_text.toLowerCase().trim();
+
+  for (const targetQuote of allQuotes) {
+    // Skip same quote
+    if (targetQuote.quote_id === sourceQuote.quote_id) continue;
+
+    // Skip quotes from same ECF document
+    if (targetQuote.ecf_number === sourceQuote.ecf_number) continue;
+
+    const targetText = targetQuote.full_text.toLowerCase().trim();
+
+    // Calculate similarity
+    const similarity = stringSimilarity(sourceText, targetText);
+
+    if (similarity >= threshold) {
+      matches.push({
+        ecf: targetQuote.ecf_number,
+        page: targetQuote.page,
+        paragraph: undefined, // Can be enhanced later
+        line: targetQuote.line !== "[n/a]" ? targetQuote.line : undefined,
+        quote_id: targetQuote.quote_id,
+        similarity_score: similarity,
+      });
+    }
+  }
+
+  // Sort by similarity score (highest first)
+  matches.sort((a, b) => b.similarity_score - a.similarity_score);
+
+  return matches;
+}
+
+/**
+ * Scan all documents for matches to a specific quote
+ * Updates the quote with matches_scanned and matches_found
+ */
+export function scanQuoteForMatches(
+  quoteId: string,
+  threshold: number = 0.85,
+): {
+  scanned: string[];
+  found: string;
+  matches: NonNullable<EnhancedQuote["matches_found"]>;
+} {
+  const quote = enhancedQuotes.get(quoteId);
+  if (!quote) {
+    throw new Error(`Quote not found: ${quoteId}`);
+  }
+
+  // Get all unique ECF numbers (excluding the source ECF)
+  const allECFs = new Set<string>();
+  getAllEnhancedQuotes().forEach((q) => {
+    if (q.ecf_number !== quote.ecf_number) {
+      allECFs.add(q.ecf_number);
+    }
+  });
+
+  const scannedDocs = Array.from(allECFs).sort();
+
+  // Find matches
+  const matches = findCrossDocumentMatches(quote, threshold);
+
+  // Update the quote with scan results
+  quote.matches_scanned = scannedDocs;
+  quote.matches_found = matches;
+
+  // Format matches as Bluebook citations
+  const bluebookCitations = matches && matches.length > 0
+    ? matches.map((m) => formatBluebookCitation(m)).join("; ")
+    : "No matches found";
+
+  return {
+    scanned: scannedDocs,
+    found: bluebookCitations,
+    matches: matches || [],
+  };
+}
+
+/**
+ * Batch scan all quotes for cross-document matches
+ * This is the main function to run for building the cross-reference database
+ */
+export function batchScanAllQuotesForMatches(threshold: number = 0.85): {
+  total_quotes: number;
+  quotes_scanned: number;
+  total_matches_found: number;
+  processing_time_ms: number;
+} {
+  const startTime = Date.now();
+  const allQuotes = getAllEnhancedQuotes();
+
+  let quotesScanned = 0;
+  let totalMatches = 0;
+
+  for (const quote of allQuotes) {
+    const result = scanQuoteForMatches(quote.quote_id, threshold);
+    quotesScanned++;
+    totalMatches += result.matches.length;
+  }
+
+  const processingTime = Date.now() - startTime;
+
+  return {
+    total_quotes: allQuotes.length,
+    quotes_scanned: quotesScanned,
+    total_matches_found: totalMatches,
+    processing_time_ms: processingTime,
+  };
+}
+
+// =============================================================================
 // EXPORT FUNCTIONS (for other tools to use)
 // =============================================================================
 
@@ -199,8 +407,8 @@ export function getAllEnhancedQuotes(): EnhancedQuote[] {
   return Array.from(enhancedQuotes.values());
 }
 
-export function findQuotesBySource(quotedBy: string): EnhancedQuote[] {
-  const quoteIds = sourceIndex.get(quotedBy.toLowerCase()) || [];
+export function findQuotesBySource(author: string): EnhancedQuote[] {
+  const quoteIds = sourceIndex.get(author.toLowerCase()) || [];
   return quoteIds.map((id) => enhancedQuotes.get(id)!).filter(Boolean);
 }
 
@@ -243,7 +451,7 @@ export function getEnhancedStats(): {
 
   allQuotes.forEach((q) => {
     if (q.source_attribution) {
-      const source = q.source_attribution.quoted_by;
+      const source = q.source_attribution.author;
       bySource[source] = (bySource[source] || 0) + 1;
 
       if (q.source_attribution.is_nested_quote) {
@@ -508,7 +716,7 @@ export const previewJSONL: Tool = {
             ecf: data.ecf,
             page: data.page,
             quote_start: data.quoted_point.substring(0, 80) + "...",
-            quoted_by: sourceAttribution?.quoted_by || "unknown",
+            author: sourceAttribution?.author || "unknown",
             is_nested: sourceAttribution?.is_nested_quote ? "YES" : "NO",
             original_source: sourceAttribution?.original_source || "-",
             date: data.date || "-",
@@ -530,7 +738,7 @@ export const previewJSONL: Tool = {
         "ECF",
         "Pg",
         "Quote Start",
-        "Quoted By",
+        "Author",
         "Nested?",
         "Orig Source",
         "Date",
@@ -543,7 +751,7 @@ export const previewJSONL: Tool = {
         if (entry.error) {
           return `| ${entry.line} | ERROR | | | | | | | | | ${entry.error} |`;
         }
-        return `| ${entry.line} | ${entry.ecf} | ${entry.page} | ${entry.quote_start} | ${entry.quoted_by} | ${entry.is_nested} | ${entry.original_source} | ${entry.date} | ${entry.matter_of} | ${entry.position} | ${entry.cross_refs} |`;
+        return `| ${entry.line} | ${entry.ecf} | ${entry.page} | ${entry.quote_start} | ${entry.author} | ${entry.is_nested} | ${entry.original_source} | ${entry.date} | ${entry.matter_of} | ${entry.position} | ${entry.cross_refs} |`;
       });
 
       const table = [
@@ -576,9 +784,9 @@ export const previewJSONL: Tool = {
 
 // 4. SEARCH QUOTES BY SOURCE ATTRIBUTION
 const SearchBySourceSchema = z.object({
-  quoted_by: z
+  author: z
     .string()
-    .describe('Who is being quoted? e.g., "tyler", "beckerman", "defendant", "exhibit"'),
+    .describe('Who is the author/speaker? e.g., "tyler", "beckerman", "defendant", "exhibit"'),
   include_nested_only: z
     .boolean()
     .optional()
@@ -593,9 +801,9 @@ export const searchBySource: Tool = {
     inputSchema: zodToJsonSchema(SearchBySourceSchema),
   },
   handle: async (_context, params) => {
-    const { quoted_by, include_nested_only } = SearchBySourceSchema.parse(params);
+    const { author, include_nested_only } = SearchBySourceSchema.parse(params);
 
-    let results = findQuotesBySource(quoted_by);
+    let results = findQuotesBySource(author);
 
     if (include_nested_only) {
       results = results.filter((q) => q.source_attribution?.is_nested_quote);
@@ -607,7 +815,7 @@ export const searchBySource: Tool = {
           type: "text",
           text: JSON.stringify(
             {
-              quoted_by,
+              author,
               include_nested_only,
               count: results.length,
               quotes: results,
@@ -724,6 +932,171 @@ export const getEnhancedStatsTools: Tool = {
         {
           type: "text",
           text: JSON.stringify(stats, null, 2),
+        },
+      ],
+    };
+  },
+};
+
+// 8. SCAN SINGLE QUOTE FOR CROSS-DOCUMENT MATCHES
+const ScanQuoteSchema = z.object({
+  quote_id: z.string().describe("Quote ID to scan for matches in other documents"),
+  threshold: z
+    .number()
+    .optional()
+    .default(0.85)
+    .describe("Similarity threshold (0-1, default 0.85 = 85% match)"),
+});
+
+export const scanQuote: Tool = {
+  schema: {
+    name: "jsonl_scan_quote_for_matches",
+    description:
+      "Scan a specific quote for matching text in other ECF documents. Returns Bluebook citations of all matches found. Useful for proving you already presented facts in the record.",
+    inputSchema: zodToJsonSchema(ScanQuoteSchema),
+  },
+  handle: async (_context, params) => {
+    const { quote_id, threshold } = ScanQuoteSchema.parse(params);
+
+    try {
+      const result = scanQuoteForMatches(quote_id, threshold);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                quote_id,
+                threshold,
+                scanned_documents: result.scanned,
+                bluebook_citations: result.found,
+                matches: result.matches,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error scanning quote: ${error}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  },
+};
+
+// 9. BATCH SCAN ALL QUOTES FOR MATCHES
+const BatchScanSchema = z.object({
+  threshold: z
+    .number()
+    .optional()
+    .default(0.85)
+    .describe("Similarity threshold (0-1, default 0.85 = 85% match)"),
+});
+
+export const batchScanQuotes: Tool = {
+  schema: {
+    name: "jsonl_batch_scan_all_quotes",
+    description:
+      "Scan ALL quotes for cross-document matches. This builds a complete cross-reference database showing where each fact appears in multiple documents. Essential for proving you already presented information in the record.",
+    inputSchema: zodToJsonSchema(BatchScanSchema),
+  },
+  handle: async (_context, params) => {
+    const { threshold } = BatchScanSchema.parse(params);
+
+    try {
+      const result = batchScanAllQuotesForMatches(threshold);
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                threshold,
+                ...result,
+                note: "All quotes have been scanned. Use jsonl_get_quote_with_matches to view results.",
+              },
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error batch scanning quotes: ${error}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  },
+};
+
+// 10. GET QUOTE WITH CROSS-REFERENCE MATCHES
+const GetQuoteWithMatchesSchema = z.object({
+  quote_id: z.string().describe("Quote ID to retrieve with cross-reference matches"),
+});
+
+export const getQuoteWithMatches: Tool = {
+  schema: {
+    name: "jsonl_get_quote_with_matches",
+    description:
+      "Get a quote with its cross-reference matches (if scanned). Shows where the same/similar text appears in other documents with proper Bluebook citations.",
+    inputSchema: zodToJsonSchema(GetQuoteWithMatchesSchema),
+  },
+  handle: async (_context, params) => {
+    const { quote_id } = GetQuoteWithMatchesSchema.parse(params);
+
+    const quote = getEnhancedQuoteById(quote_id);
+
+    if (!quote) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Quote not found: ${quote_id}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    // Format matches as Bluebook citations if available
+    const bluebookCitations = quote.matches_found
+      ?.map((m) => formatBluebookCitation(m))
+      .join("; ");
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(
+            {
+              quote_id: quote.quote_id,
+              ecf: quote.ecf_number,
+              page: quote.page,
+              full_text: quote.full_text,
+              author: quote.source_attribution?.author,
+              matches_scanned: quote.matches_scanned || [],
+              bluebook_citations: bluebookCitations || "Not scanned yet",
+              matches_found: quote.matches_found || [],
+            },
+            null,
+            2,
+          ),
         },
       ],
     };

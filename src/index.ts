@@ -67,6 +67,10 @@ const jsonlTools: Tool[] = [
   jsonlLoader.searchByDateRange,
   jsonlLoader.findCrossReferences,
   jsonlLoader.getEnhancedStatsTools,
+  // Cross-reference fuzzy matching
+  jsonlLoader.scanQuote,
+  jsonlLoader.batchScanQuotes,
+  jsonlLoader.getQuoteWithMatches,
 ];
 
 const timelineTools: Tool[] = [

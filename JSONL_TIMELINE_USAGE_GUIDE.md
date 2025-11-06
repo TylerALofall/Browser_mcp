@@ -29,7 +29,7 @@ jsonl_preview_table({
 - ECF number
 - Page
 - Quote start (first 80 chars)
-- Quoted by (who is speaking)
+- Author (who is speaking)
 - Is nested? (YES if you're quoting someone else)
 - Original source
 - Date
@@ -115,8 +115,8 @@ timeline_import_jsonl({
 Each line is a separate JSON object:
 
 ```jsonl
-{"ecf": "11", "page": "1", "line": "[n/a]", "quoted_point": "Full quote text here", "matter_of": "Fact", "cited": "Source citation", "position": "Positive", "quoted_by": "tyler", "date": "2024-07-15", "event_type": "filing", "cross_references": ["8", "10"]}
-{"ecf": "43", "page": "3", "line": "8", "quoted_point": "Quote from DDA response", "matter_of": "Fact", "position": "Negative", "quoted_by": "dda", "original_source": "ECF 36", "date": "2024-08-20"}
+{"ecf": "11", "page": "1", "line": "[n/a]", "quoted_point": "Full quote text here", "matter_of": "Fact", "cited": "Source citation", "position": "Positive", "author": "tyler", "date": "2024-07-15", "event_type": "filing", "cross_references": ["8", "10"]}
+{"ecf": "43", "page": "3", "line": "8", "quoted_point": "Quote from DDA response", "matter_of": "Fact", "position": "Negative", "author": "dda", "original_source": "ECF 36", "date": "2024-08-20"}
 ```
 
 ### Field Descriptions
@@ -130,7 +130,7 @@ Each line is a separate JSON object:
 | `matter_of` | No | "Fact" or "Law" | `"Fact"` |
 | `cited` | No | Citation/source | `"ECF 11 Opposition"` |
 | `position` | No | "Positive", "Negative", "Indifferent" | `"Positive"` |
-| `quoted_by` | No | Who is speaking | `"tyler"`, `"beckerman"`, `"dda"` |
+| `author` | No | Who is speaking | `"tyler"`, `"beckerman"`, `"dda"` |
 | `original_source` | No | If nested quote, where from | `"Exhibit A"`, `"ECF 17-1"` |
 | `date` | No | Event date (YYYY-MM-DD) | `"2024-07-15"` |
 | `event_type` | No | "filing", "ruling", "hearing", etc. | `"filing"` |
@@ -148,26 +148,26 @@ When **you (Tyler)** quote **someone else** from an exhibit, the system detects 
 
 #### Tyler's Direct Quote (NOT nested):
 ```jsonl
-{"ecf": "11", "quoted_point": "Plaintiff requests the court to...", "quoted_by": "tyler"}
+{"ecf": "11", "quoted_point": "Plaintiff requests the court to...", "author": "tyler"}
 ```
 Result: `is_nested_quote: false`
 
 #### Tyler Quoting DDA (NESTED):
 ```jsonl
-{"ecf": "43", "quoted_point": "\"We find no evidence of misconduct\"", "quoted_by": "dda", "original_source": "ECF 36"}
+{"ecf": "43", "quoted_point": "\"We find no evidence of misconduct\"", "author": "dda", "original_source": "ECF 36"}
 ```
 Result: `is_nested_quote: true`
 
 #### Tyler Quoting from Exhibit (NESTED):
 ```jsonl
-{"ecf": "17-1", "quoted_point": "\"The defendant failed to appear\"", "quoted_by": "exhibit", "original_source": "Exhibit A - Court Record"}
+{"ecf": "17-1", "quoted_point": "\"The defendant failed to appear\"", "author": "exhibit", "original_source": "Exhibit A - Court Record"}
 ```
 Result: `is_nested_quote: true`
 
 ### Automatic Detection
 
 The system automatically detects nested quotes based on:
-1. `quoted_by` field != "tyler"
+1. `author` field != "tyler"
 2. Presence of quotation marks within the text
 3. Citations to exhibits (e.g., "ECF 17-1", "Exhibit A")
 
@@ -176,7 +176,7 @@ The system automatically detects nested quotes based on:
 ```typescript
 // Find all quotes where Tyler is quoting someone else
 jsonl_search_by_source({
-  quoted_by: "dda",  // or "beckerman", "west_linn", "exhibit", etc.
+  author: "dda",  // or "beckerman", "west_linn", "exhibit", etc.
   include_nested_only: true
 })
 ```
@@ -294,7 +294,7 @@ You mentioned ECF 35 (1-15) from the state claim shows they were already aware o
 ### Add State Court Events
 
 ```jsonl
-{"ecf": "35-1", "page": "1", "date": "2022-10-15", "quoted_point": "State court was already aware of...", "matter_of": "Fact", "event_type": "state_court", "position": "Positive", "quoted_by": "tyler"}
+{"ecf": "35-1", "page": "1", "date": "2022-10-15", "quoted_point": "State court was already aware of...", "matter_of": "Fact", "event_type": "state_court", "position": "Positive", "author": "tyler"}
 {"ecf": "35-2", "page": "2", "date": "2022-11-20", "quoted_point": "Defendant knew about...", "matter_of": "Fact", "event_type": "state_court", "position": "Positive"}
 ```
 
@@ -330,7 +330,7 @@ jsonl_search_by_date_range({
 
 // 2. Filter to Tyler's positive quotes
 jsonl_search_by_source({
-  quoted_by: "tyler"
+  author: "tyler"
 })
 
 // 3. Build timeline narrative
@@ -348,12 +348,12 @@ timeline_build_narrative({
 ```typescript
 // 1. Find DDA quotes
 jsonl_search_by_source({
-  quoted_by: "dda"
+  author: "dda"
 })
 
 // 2. Find West Linn quotes
 jsonl_search_by_source({
-  quoted_by: "west_linn"
+  author: "west_linn"
 })
 
 // 3. Find what they're referencing
@@ -398,7 +398,7 @@ timeline_build_narrative({
 └── master_timeline.jsonl           # Combined timeline
 ```
 
-### Naming Convention for `quoted_by`
+### Naming Convention for `author`
 
 Use consistent names:
 - `"tyler"` - Your quotes
@@ -483,7 +483,7 @@ timeline_build_narrative({
 
 // 6. Find nested quotes (where you're quoting opposition)
 jsonl_search_by_source({
-  quoted_by: "dda",
+  author: "dda",
   include_nested_only: true
 })
 
@@ -512,7 +512,7 @@ A: The JSONL loader streams data, so it can handle millions of quotes. It proces
 
 **Q: How does nested quote detection work?**
 A: The system looks for:
-1. `quoted_by` field set to someone other than "tyler"
+1. `author` field set to someone other than "tyler"
 2. Quotation marks within the quote text
 3. References to exhibits in the `original_source` field
 
