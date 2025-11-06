@@ -1,0 +1,3 @@
+# Protect Tyler's sensitive case data
+*.json
+!.gitignore

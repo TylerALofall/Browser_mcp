@@ -1,0 +1,29 @@
+[
+  {
+    "ecf": "11",
+    "page": "1",
+    "line": "5",
+    "quoted_point": "Plaintiff here by is giving notification of his opposition to the defendant's motion to dismiss.",
+    "matter_of": "Fact",
+    "cited": "ECF 11 Plaintiff Opposition Brief",
+    "position": "Positive"
+  },
+  {
+    "ecf": "11",
+    "page": "3",
+    "line": "12",
+    "quoted_point": "The Court lacks jurisdiction to dismiss this case because the plaintiff has demonstrated standing under Article III.",
+    "matter_of": "Law",
+    "cited": "Lujan v. Defenders of Wildlife, 504 U.S. 555 (1992)",
+    "position": "Positive"
+  },
+  {
+    "ecf": "11",
+    "page": "7",
+    "line": "n/a",
+    "quoted_point": "Defendant's argument fails to address the core constitutional issues raised in the complaint.",
+    "matter_of": "Fact",
+    "cited": "ECF 11 Plaintiff Opposition Brief",
+    "position": "Positive"
+  }
+]

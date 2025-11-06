@@ -10,6 +10,9 @@ import { createServerWithTools } from "@/server";
 import * as common from "@/tools/common";
 import * as custom from "@/tools/custom";
 import * as scoreboard from "@/tools/scoreboard";
+import * as quoteStorage from "@/tools/quote-storage";
+import * as quoteSearch from "@/tools/quote-search";
+import * as quoteValidate from "@/tools/quote-validate";
 import * as snapshot from "@/tools/snapshot";
 import type { Tool } from "@/tools/tool";
 
@@ -37,6 +40,21 @@ const scoreboardTools: Tool[] = [
   scoreboard.resetScoreboard,
 ];
 
+const quoteTools: Tool[] = [
+  // Storage tools
+  quoteStorage.importQuotes,
+  quoteStorage.loadQuotesByECF,
+  quoteStorage.getStats,
+  quoteStorage.exportQuotes,
+  // Search tools
+  quoteSearch.quoteSearch,
+  quoteSearch.buildQuoteChain,
+  // Validation tools (Tyler's "Can't Go Wrong" system)
+  quoteValidate.validateQuote,
+  quoteValidate.validateBrief,
+  quoteValidate.findDifferences,
+];
+
 const snapshotTools: Tool[] = [
   common.navigate(true),
   common.goBack(true),
@@ -49,6 +67,7 @@ const snapshotTools: Tool[] = [
   ...commonTools,
   ...customTools,
   ...scoreboardTools,
+  ...quoteTools,
 ];
 
 const resources: Resource[] = [];
