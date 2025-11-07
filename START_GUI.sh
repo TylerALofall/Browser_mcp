@@ -31,4 +31,4 @@ if ! command -v node &> /dev/null; then
 fi
 
 # Start the server
-node server.js
+node server.cjs
