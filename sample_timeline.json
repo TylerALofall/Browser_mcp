@@ -1,0 +1,122 @@
+[
+  {
+    "event_id": "evt-001",
+    "date": "2023-01-10",
+    "title": "Tyler Files Administrative Complaint",
+    "description": "Tyler submitted administrative complaint with all required documentation, exhausting administrative remedies as required by law.",
+    "event_type": "filing",
+    "primary_ecf": "17",
+    "cross_referenced_ecfs": ["8", "36"],
+    "related_quote_ids": [],
+    "importance": "critical",
+    "created_at": 1704931200000
+  },
+  {
+    "event_id": "evt-002",
+    "date": "2023-03-15",
+    "title": "Administrative Remedies Exhausted",
+    "description": "All administrative remedies completed as documented in Exhibit A of ECF 8. Tyler provided proof of completion to all relevant parties.",
+    "event_type": "deadline",
+    "primary_ecf": "8",
+    "cross_referenced_ecfs": ["36"],
+    "related_quote_ids": [],
+    "importance": "critical",
+    "created_at": 1710460800000
+  },
+  {
+    "event_id": "evt-003",
+    "date": "2023-06-01",
+    "title": "Tyler Files Opposition Brief",
+    "description": "Tyler files comprehensive opposition to defendant's motion to dismiss, including three exhibits proving exhaustion of remedies.",
+    "event_type": "filing",
+    "primary_ecf": "11",
+    "cross_referenced_ecfs": ["8", "17"],
+    "related_quote_ids": [],
+    "importance": "high",
+    "created_at": 1717200000000
+  },
+  {
+    "event_id": "evt-004",
+    "date": "2023-07-15",
+    "title": "DDA Files Response Brief",
+    "description": "DDA files response claiming Tyler never exhausted administrative remedies, contrary to evidence in ECF 8 and ECF 36.",
+    "event_type": "filing",
+    "primary_ecf": "43",
+    "cross_referenced_ecfs": ["60"],
+    "related_quote_ids": [],
+    "importance": "high",
+    "created_at": 1721001600000
+  },
+  {
+    "event_id": "evt-005",
+    "date": "2023-07-20",
+    "title": "West Linn Files Response",
+    "description": "West Linn Police Department files response asserting qualified immunity defense.",
+    "event_type": "filing",
+    "primary_ecf": "44",
+    "cross_referenced_ecfs": ["60"],
+    "related_quote_ids": [],
+    "importance": "medium",
+    "created_at": 1721433600000
+  },
+  {
+    "event_id": "evt-006",
+    "date": "2023-08-10",
+    "title": "Tyler Files Declaration",
+    "description": "Tyler submits sworn declaration with three exhibits proving exhaustion of administrative remedies, directly contradicting DDA's claims.",
+    "event_type": "filing",
+    "primary_ecf": "36",
+    "cross_referenced_ecfs": ["8", "17", "43"],
+    "related_quote_ids": [],
+    "importance": "critical",
+    "created_at": 1723248000000
+  },
+  {
+    "event_id": "evt-007",
+    "date": "2023-09-15",
+    "title": "Magistrate Beckerman Issues ECF 60 Order",
+    "description": "Magistrate Beckerman issues order containing multiple negative findings against Tyler, many contradicting evidence in the record.",
+    "event_type": "ruling",
+    "primary_ecf": "60",
+    "cross_referenced_ecfs": ["8", "11", "17", "36", "43", "44"],
+    "related_quote_ids": [],
+    "importance": "critical",
+    "created_at": 1726358400000
+  },
+  {
+    "event_id": "evt-008",
+    "date": "2023-02-01",
+    "title": "Initial Complaint Filed",
+    "description": "Tyler files initial complaint in federal court after exhausting all administrative remedies.",
+    "event_type": "filing",
+    "primary_ecf": "1",
+    "cross_referenced_ecfs": [],
+    "related_quote_ids": [],
+    "importance": "critical",
+    "created_at": 1706745600000
+  },
+  {
+    "event_id": "evt-009",
+    "date": "2023-05-01",
+    "title": "Defendants File Motion to Dismiss",
+    "description": "Defendants file coordinated motions to dismiss, claiming various procedural deficiencies.",
+    "event_type": "filing",
+    "primary_ecf": "9",
+    "cross_referenced_ecfs": ["43", "44"],
+    "related_quote_ids": [],
+    "importance": "high",
+    "created_at": 1714521600000
+  },
+  {
+    "event_id": "evt-010",
+    "date": "2023-08-25",
+    "title": "Tyler Files Reply Brief",
+    "description": "Tyler files reply brief responding to defendants' mischaracterizations and providing additional evidence.",
+    "event_type": "filing",
+    "primary_ecf": "17",
+    "cross_referenced_ecfs": ["8", "11", "36", "43", "44"],
+    "related_quote_ids": [],
+    "importance": "high",
+    "created_at": 1724544000000
+  }
+]

@@ -1,0 +1,119 @@
+[
+  {
+    "ecf": "60",
+    "page": "1",
+    "line": "5",
+    "quoted_point": "Tyler failed to exhaust administrative remedies before filing suit.",
+    "matter_of": "Law",
+    "cited": "Beckerman Decision",
+    "position": "Negative"
+  },
+  {
+    "ecf": "60",
+    "page": "1",
+    "line": "12",
+    "quoted_point": "The plaintiff's claims are time-barred under the applicable statute of limitations.",
+    "matter_of": "Law",
+    "cited": "Beckerman Decision",
+    "position": "Negative"
+  },
+  {
+    "ecf": "60",
+    "page": "2",
+    "line": "3",
+    "quoted_point": "Tyler did not provide sufficient evidence to support his constitutional claims.",
+    "matter_of": "Fact",
+    "cited": "Beckerman Decision",
+    "position": "Negative"
+  },
+  {
+    "ecf": "60",
+    "page": "2",
+    "line": "18",
+    "quoted_point": "The defendant's actions were within the scope of qualified immunity.",
+    "matter_of": "Law",
+    "cited": "Beckerman Decision",
+    "position": "Negative"
+  },
+  {
+    "ecf": "60",
+    "page": "3",
+    "line": "7",
+    "quoted_point": "Plaintiff failed to establish a genuine dispute of material fact.",
+    "matter_of": "Fact",
+    "cited": "Beckerman Decision",
+    "position": "Negative"
+  },
+  {
+    "ecf": "8",
+    "page": "4",
+    "line": "12",
+    "quoted_point": "I exhausted all administrative remedies on March 15, 2023, as evidenced by Exhibit A.",
+    "matter_of": "Fact",
+    "cited": "Tyler Opposition Brief",
+    "position": "Positive"
+  },
+  {
+    "ecf": "11",
+    "page": "1",
+    "line": "5",
+    "quoted_point": "Plaintiff hereby gives notification of his opposition to the defendant's motion to dismiss.",
+    "matter_of": "Fact",
+    "cited": "Tyler Plaintiff Opposition Brief",
+    "position": "Positive"
+  },
+  {
+    "ecf": "11",
+    "page": "3",
+    "line": "12",
+    "quoted_point": "The Court has jurisdiction because plaintiff has demonstrated standing under Article III.",
+    "matter_of": "Law",
+    "cited": "Lujan v. Defenders of Wildlife, 504 U.S. 555 (1992)",
+    "position": "Positive"
+  },
+  {
+    "ecf": "36",
+    "page": "1",
+    "line": "1",
+    "quoted_point": "Declaration of Tyler: I submit three exhibits proving exhaustion of administrative remedies.",
+    "matter_of": "Fact",
+    "cited": "Tyler Declaration",
+    "position": "Positive"
+  },
+  {
+    "ecf": "43",
+    "page": "5",
+    "line": "8",
+    "quoted_point": "Tyler never exhausted administrative remedies as required by law.",
+    "matter_of": "Law",
+    "cited": "DDA Response Brief",
+    "position": "Negative"
+  },
+  {
+    "ecf": "43",
+    "page": "6",
+    "line": "15",
+    "quoted_point": "The plaintiff's claims are barred by the statute of limitations.",
+    "matter_of": "Law",
+    "cited": "DDA Response Brief",
+    "position": "Negative"
+  },
+  {
+    "ecf": "44",
+    "page": "2",
+    "line": "10",
+    "quoted_point": "West Linn Police Department acted within qualified immunity.",
+    "matter_of": "Law",
+    "cited": "West Linn Response",
+    "position": "Negative"
+  },
+  {
+    "ecf": "17",
+    "page": "3",
+    "line": "8",
+    "quoted_point": "Tyler filed his administrative complaint on January 10, 2023, well before the deadline.",
+    "matter_of": "Fact",
+    "cited": "Tyler Reply Brief",
+    "position": "Positive"
+  }
+]

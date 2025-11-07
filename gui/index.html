@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECF 60 Validator - Local GUI</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ECF 60 Negative Claim Validator</h1>
+            <p class="subtitle">Local Document Analysis System</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab active" data-tab="overview">Overview</button>
+            <button class="tab" data-tab="claims">Claims List</button>
+            <button class="tab" data-tab="timeline">Timeline</button>
+            <button class="tab" data-tab="validator">Validator</button>
+            <button class="tab" data-tab="report">Report</button>
+        </nav>
+
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total ECF 60 Claims</h3>
+                    <p class="stat-number" id="total-claims">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Negative Claims</h3>
+                    <p class="stat-number" id="negative-claims">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Validated</h3>
+                    <p class="stat-number" id="validated-claims">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Timeline Events</h3>
+                    <p class="stat-number" id="timeline-events">0</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Quick Actions</h2>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="loadECF60Data()">Load ECF 60 Data</button>
+                    <button class="btn btn-secondary" onclick="loadTimeline()">Load Timeline</button>
+                    <button class="btn btn-success" onclick="startValidation()">Start Validation</button>
+                    <button class="btn btn-info" onclick="exportReport()">Export Report</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Data Import</h2>
+                <div class="upload-section">
+                    <label for="ecf-upload" class="upload-label">
+                        Upload ECF 60 JSON/JSONL File:
+                        <input type="file" id="ecf-upload" accept=".json,.jsonl" onchange="handleECFUpload(event)">
+                    </label>
+                    <label for="timeline-upload" class="upload-label">
+                        Upload Timeline JSON/JSONL File:
+                        <input type="file" id="timeline-upload" accept=".json,.jsonl" onchange="handleTimelineUpload(event)">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Claims List Tab -->
+        <div id="claims" class="tab-content">
+            <div class="card">
+                <div class="filter-bar">
+                    <input type="text" id="claim-search" placeholder="Search claims..." onkeyup="filterClaims()">
+                    <select id="position-filter" onchange="filterClaims()">
+                        <option value="all">All Positions</option>
+                        <option value="Negative">Negative</option>
+                        <option value="Positive">Positive</option>
+                        <option value="Neutral">Neutral</option>
+                    </select>
+                </div>
+                <div id="claims-list" class="claims-list">
+                    <!-- Claims will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Tab -->
+        <div id="timeline" class="tab-content">
+            <div class="card">
+                <h2>Case Timeline</h2>
+                <div id="timeline-view" class="timeline-view">
+                    <!-- Timeline will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Validator Tab -->
+        <div id="validator" class="tab-content">
+            <div class="card">
+                <h2>Claim Validation</h2>
+                <div id="validator-content">
+                    <p>Select a claim from the Claims List to validate it.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Tab -->
+        <div id="report" class="tab-content">
+            <div class="card">
+                <h2>Fraud Report</h2>
+                <div id="report-content">
+                    <p>Generate validation report after processing claims.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
